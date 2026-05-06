@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sri Raghavardhini M - UX/UI Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Light Mode Color Palette as requested */
+            --primary-bg: #FFFFFF; /* White */
+            --primary-bg-alt: #F3F4F6; /* Light Grey */
+            --text-main: #111827; /* Dark Grey / Almost Black */
+            --text-muted: #4B5563; /* Medium Grey */
+            --accent: #2563EB; /* Blue */
+            --accent-glow: rgba(37, 99, 235, 0.2);
+            --accent-2: #10B981; /* Soft Green */
+            --highlight: #2563EB; 
+            
+            /* Glassmorphism for Light Mode */
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(0, 0, 0, 0.08); /* Subtle dark border for crisp edges */
+            --card-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Modal Styles */
+        .image-modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            padding-top: 5vh; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .image-modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            object-fit: contain;
+        }
+
+        .image-modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: #ffffff;
+            font-size: 40px;
+            font-weight: 300;
+            transition: 0.3s;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .close-modal:hover {
+            color: var(--accent-2);
+            transform: scale(1.1);
+        }
+
+        .clickable-box {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .clickable-box:hover::after {
+            content: 'Click to view Certificate';
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Background Blobs (Softened for light mode) */
+        .ambient-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(140px);
+            z-index: -1;
+            opacity: 0.6;
+            animation: float 20s infinite ease-in-out alternate;
+        }
+
+        .blob-1 {
+            top: -10%; left: -10%;
+            width: 50vw; height: 50vw;
+            background: linear-gradient(to right, rgba(37,99,235, 0.15), rgba(16,185,129, 0.15));
+        }
+
+        .blob-2 {
+            bottom: -10%; right: -10%;
+            width: 40vw; height: 40vw;
+            background: linear-gradient(to left, rgba(16,185,129, 0.15), rgba(37,99,235, 0.15));
+            animation-delay: -10s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.1); }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 1.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 100;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Layout Utility */
+        section {
+            padding: 8rem 5%;
+            position: relative;
+        }
+        
+        .alt-section {
+            background-color: var(--primary-bg-alt);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 6rem;
+        }
+
+        .hero-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 5rem;
+            width: 100%;
+        }
+
+        .hero-content {
+            flex: 1;
+            max-width: 700px;
+        }
+
+        .hero-image-container {
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .hero-profile-img {
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #FFFFFF;
+            box-shadow: 0 0 40px rgba(37, 99, 235, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .hero-image-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            filter: blur(40px);
+            opacity: 0.4;
+            z-index: 1;
+            animation: pulse-glow 4s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; }
+            100% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.5; }
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 5vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -2px;
+            color: var(--text-main);
+        }
+
+        .hero h1 span {
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+            max-width: 600px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 1.2rem 2.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+        }
+
+        .btn i { margin-left: 0.8rem; }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            color: white;
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--text-muted);
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(0, 0, 0, 0.05);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 4rem;
+            letter-spacing: -1px;
+            text-align: center;
+            color: var(--text-main);
+        }
+        
+        .section-title span {
+            color: var(--accent);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            margin-top: -3rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Glass Card Component */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: var(--card-shadow);
+            transition: all 0.4s ease;
+        }
+
+        .glass-card:hover {
+            border-color: rgba(37, 99, 235, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 0 20px rgba(37, 99, 235, 0.05);
+        }
+
+        /* Experience Section */
+        .exp-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1.5rem;
+        }
+
+        .exp-title h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+        }
+
+        .exp-title p {
+            font-size: 1.1rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .exp-date {
+            font-size: 1rem;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.05);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .exp-list {
+            margin-top: 2rem;
+            padding-left: 1.5rem;
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .exp-list li { margin-bottom: 1rem; color: #374151; }
+
+        /* Projects Section */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+        }
+
+        .project-card.featured {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: row;
+            align-items: stretch;
+            gap: 0;
+            padding: 0;
+        }
+
+        .project-card {
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 0;
+            background: #FFFFFF;
+        }
+
+        .project-card:hover { transform: translateY(-10px); }
+
+        .project-img {
+            width: 100%;
+            height: 350px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .project-img i {
+            font-size: 5rem; color: white; opacity: 0.9;
+            transition: transform 0.5s ease;
+        }
+        
+        .project-card:hover .project-img i { transform: scale(1.1); }
+
+        .img-research { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .img-tripstyle { background: linear-gradient(135deg, #FF6B6B, #556270); }
+        .img-glossmart { background: linear-gradient(135deg, #11998e, #38ef7d); }
+        .img-crypto { background: linear-gradient(135deg, #1e3c72, #2a5298); }
+
+        .project-info { padding: 2.5rem; }
+        .project-category { color: var(--accent); font-size: 0.9rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .project-title { font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-main); font-weight: 700;}
+        .project-desc { color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.95rem; }
+        
+        .tech-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .tag { background: rgba(0,0,0,0.05); color: #374151; padding: 0.4rem 1rem; border-radius: 8px; font-size: 0.8rem; border: 1px solid rgba(0,0,0,0.08); font-weight: 500;}
+
+        /* Education & Details Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2.5rem;
+        }
+
+        .edu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .edu-item:last-child { border-bottom: none; padding-bottom: 0; }
+        
+        .edu-info h4 { font-size: 1.2rem; color: var(--text-main); font-weight: 700; margin-bottom: 0.3rem;}
+        .edu-info p { color: var(--text-muted); font-size: 0.95rem;}
+        .edu-meta { text-align: right;}
+        .edu-meta .date { display: block; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.3rem; font-weight: 500;}
+        .edu-meta .grade { color: var(--accent); font-weight: 700; font-size: 0.95rem; background: rgba(37, 99, 235, 0.1); padding: 0.3rem 0.8rem; border-radius: 8px;}
+
+        /* Lists & Badges */
+        .cert-list { list-style: none; padding: 0; }
+        .cert-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+        .cert-list li:last-child { border-bottom: none; }
+        .cert-list li i { color: var(--accent-2); font-size: 1.2rem; }
+
+        .language-item {
+            display: flex; justify-content: space-between;
+            padding: 1rem 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .lang-name { color: var(--text-main); font-weight: 700; }
+        .lang-level { color: var(--text-muted); font-weight: 500;}
+
+        .pills-container { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
+        .pill { background: rgba(16, 185, 129, 0.1); color: #047857; padding: 0.5rem 1.2rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+        /* Contact Section */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .contact-card {
+            background: #FFFFFF;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            min-height: 120px;
+        }
+
+        .contact-card:hover {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-color: var(--accent);
+            transform: translateY(-5px);
+        }
+
+        .contact-icon {
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, rgba(37,99,235,0.1), rgba(16,185,129,0.1));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.5rem; color: var(--accent);
+        }
+
+        .contact-info h4 { font-size: 1rem; color: var(--text-muted); margin-bottom: 0.3rem;}
+        .contact-info p, .contact-info a { color: var(--text-main); font-size: 1.1rem; font-weight: 600; text-decoration: none;}
+        .contact-info a:hover { color: var(--accent); }
+
+        .footer-bottom {
+            text-align: center; padding-top: 4rem; padding-bottom: 2rem;
+            color: var(--text-muted);
+            border-top: 1px solid var(--glass-border);
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .project-card.featured { flex-direction: column; }
+            .bento-grid { grid-template-columns: 1fr; }
+            .hero-layout { flex-direction: column-reverse; text-align: center; justify-content: center;}
+            .hero-content { align-items: center; display: flex; flex-direction: column;}
+            .hero p { margin-left: auto; margin-right: auto;}
+            .button-group { justify-content: center; width: 100%; flex-wrap: wrap;}
+            .edu-item { flex-direction: column; align-items: flex-start; gap: 1rem;}
+            .edu-meta { text-align: left; }
+            .nav-links { display: none; } /* Add hamburger for real prod */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Glow Blobs -->
+    <div class="ambient-blob blob-1"></div>
+    <div class="ambient-blob blob-2"></div>
+
+    <nav>
+        <a href="#" class="logo">Sri Raghavardhini</a>
+        <div class="nav-links">
+            <a href="#experience">Experience</a>
+            <a href="#work">Projects</a>
+            <a href="#background">Background</a>
+            <a href="#contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- 1. HERO SECTION -->
+    <section id="home" class="hero container">
+        <div class="hero-layout">
+            <div class="hero-content">
+                <h1>Sri <span>Raghavardhini M</span></h1>
+                <p>Hi, I'm Sri Raghavardhini M. I blend human-centered design with modern web technology to craft interfaces that are clear, engaging, and powerful.</p>
+                <div class="button-group">
+                    <a href="#work" class="btn btn-primary">View Projects <i class="fa-solid fa-arrow-right"></i></a>
+                    <a href="#contact" class="btn btn-secondary"><i class="fa-regular fa-envelope" style="margin-right: 0.8rem; margin-left: 0;"></i> Contact Me</a>
+                </div>
+            </div>
+            
+            <div class="hero-image-container">
+                <div class="hero-image-glow"></div>
+                <!-- Update to actual path -->
+                <img src="1.png" alt="Sri Raghavardhini" class="hero-profile-img" style="object-position: center;" onerror="this.src='https://ui-avatars.com/api/?name=Sri+Raghavardhini&size=400&background=2563EB&color=fff'">
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. EXPERIENCE SECTION -->
+    <section id="experience" class="alt-section">
+        <div class="container">
+            <h2 class="section-title">Professional <span>Experience</span></h2>
+            
+            <div class="glass-card">
+                <div class="exp-header">
+                    <div class="exp-title">
+                        <h3>Web Developer</h3>
+                        <p>ULIX Technology · Erode, India</p>
+                    </div>
+                    <div class="exp-date">May 2024 – Present</div>
+                </div>
+                <ul class="exp-list">
+                    <li>Designed visual content and UI assets for digital platforms, including social posts, banners, and promotional materials.</li>
+                    <li>Created user-centered graphic designs aligned with brand identity using Figma and Adobe-based tools.</li>
+                    <li>Collaborated with development and marketing teams to ensure consistency in visual communication.</li>
+                    <li>Improved usability and aesthetics through feedback-based design iterations.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. PROJECTS SECTION -->
+    <section id="work" class="container">
+        <h2 class="section-title">Selected <span>Work</span></h2>
+        
+        <div class="projects-grid">
+            <!-- Project: Research -->
+            <div class="glass-card project-card featured">
+                <div class="project-img img-research clickable-box" onclick="openModal('sleep-apnea-cert.png')" style="flex: 1; height: auto; align-self: stretch; min-height: 400px; border-right: 1px solid var(--glass-border);">
+                    <i class="fa-solid fa-microscope" style="font-size: 8rem;"></i>
+                </div>
+                <div class="project-info" style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 4rem 3rem;">
+                    <div class="project-category">Research Publication (IEEE)</div>
+                    <h3 class="project-title" style="font-size: 2rem;">Predicting Sleep Apnea Using ML</h3>
+                    <p class="project-desc" style="font-size: 1.05rem; line-height: 1.8;">Proposed a non-invasive screening system to predict sleep apnea risk. Built a stacking ensemble model to improve prediction performance for early detection in resource-limited settings.<br><br><b>Venue:</b> ICSADL 2026<br><b>Authors:</b> Karthikeyan S B, Sri Raghavardhini M, Nisanth G, Krupa N S, Sivakumar P, Manjarika</p>
+                    <div class="tech-tags" style="margin-top: 2rem;">
+                        <span class="tag">Machine Learning</span>
+                        <span class="tag">Ensemble Models</span>
+                        <a href="javascript:void(0)" onclick="openModal('sleep-apnea-cert.png')" style="text-decoration: none;"><span class="tag" style="background: var(--accent); color: white; border-color: var(--accent); cursor: pointer;"><i class="fa-solid fa-certificate" style="margin-right:0.4rem;"></i>View Certificate</span></a>
+                        <a href="163-4.pdf" target="_blank" style="text-decoration: none;"><span class="tag" style="background: rgba(225, 29, 72, 0.1); color: #E11D48; border: 1px solid rgba(225, 29, 72, 0.2); cursor: pointer;"><i class="fa-regular fa-file-pdf" style="margin-right:0.4rem;"></i>163-4.pdf</span></a>
+                        <a href="163.pdf" target="_blank" style="text-decoration: none;"><span class="tag" style="background: rgba(225, 29, 72, 0.1); color: #E11D48; border: 1px solid rgba(225, 29, 72, 0.2); cursor: pointer;"><i class="fa-regular fa-file-pdf" style="margin-right:0.4rem;"></i>163.pdf</span></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 1: Featured TripStyle -->
+            <div class="glass-card project-card featured">
+                <div class="project-img" style="flex: 1; height: auto; align-self: stretch; background: #fafafa; min-height: 400px; padding: 2rem; border-right: 1px solid var(--glass-border);">
+                    <!-- User instructions: rename uploaded image to tripstyle-flow.png -->
+                    <img src="tripstyle-flow.png" alt="TripStyle User Journey Map" style="width: 100%; height: 100%; object-fit: contain; min-height: 400px; display: block;" onerror="this.src='https://placehold.co/600x800/e2e8f0/64748b?text=Please+save+image+as+tripstyle-flow.png'">
+                </div>
+                <div class="project-info" style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 4rem 3rem;">
+                    <div class="project-category">UX Case Study & Prototyping</div>
+                    <h3 class="project-title" style="font-size: 2rem;">TripStyle App</h3>
+                    <p class="project-desc" style="font-size: 1.05rem; line-height: 1.8;">A comprehensive UX case study detailing user journey research and high-fidelity prototype design for an end-to-end travel companion application.<br><br><b>User Flow Mapping:</b><br>Designed a cohesive user sequence that visually tracks the journey from onboarding (Home, Login, Signup), exploring property deals (Stays, Filters), and connecting directly to real-time flight searches and price tracking. Emphasized a moody, premium dark-theme aesthetic using vibrant neon glows for intuitive navigation.</p>
+                    <div class="tech-tags" style="margin-top: 2rem;">
+                        <span class="tag">Figma</span>
+                        <span class="tag">High-Fidelity Prototyping</span>
+                        <span class="tag">User Flow Design</span>
+                        <span class="tag">UX Research</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 2 -->
+            <div class="glass-card project-card">
+                <div class="project-img img-glossmart">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+                <div class="project-info">
+                    <div class="project-category">Web Application</div>
+                    <h3 class="project-title"><a href="https://github.com/sri-ragha/glossmart-fullstackproject" target="_blank" style="color: inherit; text-decoration: none; transition: color 0.3s ease;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'">Glossmart <i class="fa-brands fa-github" style="font-size: 0.8em; margin-left: 5px;"></i></a></h3>
+                    <p class="project-desc">A responsive MERN stack e-commerce layout emphasizing modern shopping experiences, clear state management, and brand alignment.</p>
+                    <div class="tech-tags">
+                        <span class="tag">MERN Stack</span>
+                        <span class="tag">UI Layouts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 3 -->
+            <div class="glass-card project-card">
+                <div class="project-img img-crypto">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="project-info">
+                    <div class="project-category">Mobile App</div>
+                    <h3 class="project-title"><a href="https://github.com/sri-ragha/cryptoapp" target="_blank" style="color: inherit; text-decoration: none; transition: color 0.3s ease;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='inherit'">Android Crypto Guide <i class="fa-brands fa-github" style="font-size: 0.8em; margin-left: 5px;"></i></a></h3>
+                    <p class="project-desc">A dark-themed dashboard application for Android designed to visualize complex real-time cryptocurrency data intuitively.</p>
+                    <div class="tech-tags">
+                        <span class="tag">Flutter</span>
+                        <span class="tag">Dashboard UI</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. BACKGROUND & DETAILS SECTION -->
+    <section id="background" class="alt-section">
+        <div class="container">
+            <h2 class="section-title">Academic & <span>Background</span></h2>
+            
+            <div class="bento-grid">
+                
+                <!-- Education Column -->
+                <div class="glass-card">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-graduation-cap" style="color:var(--accent); margin-right: 10px;"></i> Education</h3>
+                    
+                    <div class="edu-item">
+                        <div class="edu-info">
+                            <h4>Bachelor of Science (B.Sc.) IT</h4>
+                            <p>PSGR Krishnammal College for Women, Coimbatore</p>
+                        </div>
+                        <div class="edu-meta">
+                            <span class="date">2021 – 2024</span>
+                            <span class="grade">65.84% | German Grade: 2.7</span>
+                        </div>
+                    </div>
+
+                    <div class="edu-item">
+                        <div class="edu-info">
+                            <h4>Higher Secondary Certificate (HSC)</h4>
+                            <p>Vellalar Matriculation Hr. Sec. School for Women, Erode</p>
+                        </div>
+                        <div class="edu-meta">
+                            <span class="date">2020 – 2021</span>
+                            <span class="grade">83%</span>
+                        </div>
+                    </div>
+
+                    <div class="edu-item">
+                        <div class="edu-info">
+                            <h4>Secondary School Leaving Certificate (SSLC)</h4>
+                            <p>Bharathi Vidya Bhavan Hr. Sec. School, Erode</p>
+                        </div>
+                        <div class="edu-meta">
+                            <span class="date">2018 – 2019</span>
+                            <span class="grade">78.20%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column Stack -->
+                <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+                    
+                    <div class="glass-card" style="padding: 2rem;">
+                        <h3 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-language" style="color:var(--accent); margin-right: 10px;"></i> Languages</h3>
+                        <div class="language-item" style="padding-top:0;">
+                            <span class="lang-name">Tamil</span>
+                            <span class="lang-level">Native</span>
+                        </div>
+                        <div class="language-item">
+                            <span class="lang-name">English</span>
+                            <span class="lang-level">B2 — Independent</span>
+                        </div>
+                        <div class="language-item" style="border-bottom:none; padding-bottom:0;">
+                            <span class="lang-name">German</span>
+                            <span class="lang-level">Basic</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-card" style="padding: 2rem;">
+                        <h3 style="font-size: 1.25rem; margin-bottom: 1.5rem; color: var(--text-main); font-weight: 800;"><i class="fa-solid fa-award" style="color:var(--accent); margin-right: 10px;"></i> Certifications</h3>
+                        <ul class="cert-list">
+                            <li><i class="fa-solid fa-check-circle"></i> RPA Citizen Development - UI Path</li>
+                            <li><i class="fa-solid fa-check-circle"></i> Enhancing Soft Skills - NPTEL</li>
+                            <li><i class="fa-solid fa-check-circle"></i> Acquiring Data - Future Skills Prime</li>
+                            <li style="border-bottom: none;"><i class="fa-solid fa-check-circle"></i> Front-End HTML - Great Learning</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Interests -->
+            <div class="glass-card" style="margin-top: 2.5rem; padding: 2rem 3rem;">
+                <h3 style="font-size: 1.25rem; color: var(--text-main); font-weight: 800; display: inline-block; margin-right: 2rem;"><i class="fa-solid fa-heart" style="color:var(--accent); margin-right: 10px;"></i> Interests & Domains</h3>
+                <div class="pills-container" style="display: inline-flex; vertical-align: middle; margin-top: 0;">
+                    <span class="pill">UX Design</span>
+                    <span class="pill">UI Tooling (Figma)</span>
+                    <span class="pill">Drawing</span>
+                    <span class="pill">Baking</span>
+                    <span class="pill">Travel</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 5. CONTACT SECTION -->
+    <section id="contact" class="container" style="padding-bottom: 4rem;">
+        <h2 class="section-title" style="margin-bottom: 3rem;">Let's <span>Connect</span></h2>
+        
+        <div class="contact-grid">
+            
+            <div class="contact-card">
+                <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                <div class="contact-info">
+                    <h4>Email</h4>
+                    <a href="mailto:raghavardhinisri@gmail.com">raghavardhinisri@gmail.com</a>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+                <div class="contact-info">
+                    <h4>Phone</h4>
+                    <p>+91 6381912822</p>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon"><i class="fa-brands fa-linkedin-in"></i></div>
+                <div class="contact-info">
+                    <h4>LinkedIn</h4>
+                    <a href="https://www.linkedin.com/in/sri-raghavardhini/" target="_blank">linkedin.com/in/sri-raghavardhini</a>
+                </div>
+            </div>
+
+            <div class="contact-card">
+                <div class="contact-icon"><i class="fa-brands fa-github"></i></div>
+                <div class="contact-info">
+                    <h4>GitHub</h4>
+                    <a href="https://github.com/sri-ragha" target="_blank">github.com/sri-ragha</a>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center; padding: 2rem 3rem;">
+            <div style="display: flex; align-items: center; gap: 1.5rem;">
+                <div class="contact-icon" style="width: 50px; height: 50px;"><i class="fa-solid fa-location-dot"></i></div>
+                <div>
+                    <h4 style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.2rem;">Location</h4>
+                    <p style="color: var(--text-main); font-weight: 700;">Erode, Tamil Nadu, India</p>
+                </div>
+            </div>
+            
+            <a href="mailto:raghavardhinisri@gmail.com" class="btn btn-primary" style="padding: 1rem 2.5rem;">
+                Send Email <i class="fa-solid fa-paper-plane" style="margin-left: 0.8rem;"></i>
+            </a>
+        </div>
+    </section>
+
+    <div class="footer-bottom">
+        <p>© 2026 Sri Raghavardhini M.</p>
+    </div>
+
+    <!-- The Modal -->
+    <div id="certModal" class="image-modal" onclick="if(event.target === this) closeModal()">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="certImage" alt="Certificate">
+    </div>
+
+    <script>
+        const modal = document.getElementById("certModal");
+        const modalImg = document.getElementById("certImage");
+
+        function openModal(imgSrc) {
+            modalImg.src = imgSrc;
+            // Fallback if image not found to avoid blank modal
+            modalImg.onerror = function() {
+                this.src = 'https://placehold.co/1000x700/e2e8f0/64748b?text=Please+save+image+as+' + imgSrc;
+            };
+            modal.style.display = "flex";
+            // small delay to allow display block to apply before adding class for transition
+            setTimeout(() => {
+                modal.classList.add("show");
+            }, 10);
+            
+            document.body.style.overflow = "hidden"; // Prevent scrolling
+        }
+
+        function closeModal() {
+            modal.classList.remove("show");
+            setTimeout(() => {
+                modal.style.display = "none";
+                document.body.style.overflow = "auto";
+            }, 300); // Wait for transition to finish
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape" && modal.style.display === "flex") {
+                closeModal();
+            }
+        });
+    </script>
+
+</body>
+</html>
